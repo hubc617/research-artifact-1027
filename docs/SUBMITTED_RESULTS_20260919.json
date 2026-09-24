@@ -1,0 +1,431 @@
+{
+  "version": "2026-09-19",
+  "source": "submitted manuscript 1027; supplied final reports",
+  "units": {
+    "ba": "percent",
+    "differences": "percentage_points"
+  },
+  "not_a_raw_result_archive": true,
+  "main_table": [
+    {
+      "method": "NoDistill",
+      "stage2_validation_ba": 41.23,
+      "stage3_overt_ba": 49.15,
+      "stage3_silent_ba": 38.67
+    },
+    {
+      "method": "LabelSimplex",
+      "stage2_validation_ba": 38.4,
+      "stage3_overt_ba": 47.0,
+      "stage3_silent_ba": 36.94
+    },
+    {
+      "method": "Unrestricted shuffle",
+      "stage2_validation_ba": 41.23,
+      "stage3_overt_ba": 49.29,
+      "stage3_silent_ba": 38.59
+    },
+    {
+      "method": "Within-class shuffle",
+      "stage2_validation_ba": 48.11,
+      "stage3_overt_ba": 57.09,
+      "stage3_silent_ba": 44.72
+    },
+    {
+      "method": "Instance-only (α=0)",
+      "stage2_validation_ba": 48.74,
+      "stage3_overt_ba": 58.32,
+      "stage3_silent_ba": 45.43
+    },
+    {
+      "method": "Full (α=0.3)",
+      "stage2_validation_ba": 48.61,
+      "stage3_overt_ba": 58.23,
+      "stage3_silent_ba": 45.32
+    }
+  ],
+  "primary_gain": {
+    "overt": 9.08,
+    "silent": 6.65
+  },
+  "eegnet": {
+    "ba_overt": 53.26,
+    "ba_silent": 40.12,
+    "full_minus_eegnet_overt": 4.97,
+    "full_minus_eegnet_silent": 5.2,
+    "ci_overt": [
+      3.19,
+      6.62
+    ],
+    "ci_silent": [
+      3.4,
+      6.98
+    ],
+    "p_overt": "<0.001",
+    "p_silent": "<0.001",
+    "evidence_status": "submitted values; author confirmed CI; exact selected-run subject source is not included in this artifact"
+  },
+  "adaptation": {
+    "seeds": [
+      42,
+      2026,
+      3407
+    ],
+    "full_ba": [
+      43.33,
+      33.09
+    ],
+    "nodistill_ba": [
+      35.98,
+      27.62
+    ],
+    "gain": [
+      7.35,
+      5.47
+    ],
+    "ci": [
+      [
+        6.29,
+        8.49
+      ],
+      [
+        4.37,
+        6.63
+      ]
+    ],
+    "positive_subjects": [
+      30,
+      29
+    ]
+  },
+  "zero_shot": {
+    "full_ba": [
+      23.63,
+      20.54
+    ],
+    "nodistill_ba": [
+      23.52,
+      20.51
+    ],
+    "gain": [
+      0.11,
+      0.03
+    ],
+    "ci": [
+      [
+        -0.53,
+        0.74
+      ],
+      [
+        -0.57,
+        0.63
+      ]
+    ],
+    "p": [
+      0.735,
+      0.914
+    ]
+  },
+  "channel_removal": {
+    "seed": 42,
+    "mask_in": [
+      "training",
+      "validation",
+      "testing"
+    ],
+    "stage3_retrained": true,
+    "stage2_all_channels": true,
+    "retained": [
+      "F3",
+      "F1",
+      "FZ",
+      "F2",
+      "F4",
+      "FC3",
+      "FC1",
+      "FCZ",
+      "FC2",
+      "FC4",
+      "C3",
+      "C1",
+      "CZ",
+      "C2",
+      "C4",
+      "CP3",
+      "CP1",
+      "CPZ",
+      "CP2",
+      "CP4",
+      "P3",
+      "P1",
+      "PZ",
+      "P2",
+      "P4",
+      "PO3",
+      "POZ",
+      "PO4"
+    ],
+    "removed": [
+      "FP1",
+      "FPZ",
+      "FP2",
+      "AF3",
+      "AF4",
+      "F7",
+      "F5",
+      "F6",
+      "F8",
+      "FT7",
+      "FC5",
+      "FC6",
+      "FT8",
+      "T7",
+      "C5",
+      "C6",
+      "T8",
+      "TP7",
+      "CP5",
+      "CP6",
+      "TP8",
+      "P7",
+      "P5",
+      "P6",
+      "P8",
+      "PO7",
+      "PO5",
+      "PO6",
+      "PO8",
+      "O1",
+      "OZ",
+      "O2"
+    ],
+    "all60_full": [
+      58.12,
+      45.47
+    ],
+    "all60_nodistill": [
+      49.1,
+      38.43
+    ],
+    "remaining28_full": [
+      34.42,
+      26.12
+    ],
+    "remaining28_nodistill": [
+      27.52,
+      21.52
+    ],
+    "interaction": [
+      -2.13,
+      -2.44
+    ],
+    "interaction_p": [
+      0.0109,
+      0.0012
+    ]
+  },
+  "smoothgrad": {
+    "seed": 42,
+    "tasks": 600,
+    "noise_samples": 16,
+    "noise_sd_fraction": 0.1,
+    "target": "true-class logit",
+    "normalization": "trial-level L1 before subject aggregation",
+    "outer_difference_fraction": [
+      0.0136142353,
+      0.0132848302
+    ],
+    "outer_positive_subjects": [
+      30,
+      30
+    ]
+  },
+  "modality_context": {
+    "emg_only": [
+      81.71,
+      73.11
+    ],
+    "eeg_emg": [
+      84.84,
+      76.27
+    ]
+  },
+  "audio": {
+    "encoder": "HuBERT Base",
+    "transformer_block": 9,
+    "pooling": "temporal mean",
+    "feature_dim": 768,
+    "projection_dims": [
+      768,
+      512,
+      256
+    ],
+    "exact_checkpoint_revision": "requires extraction-source archival"
+  },
+  "statistical_protocol": {
+    "unit": "paired subject",
+    "n_subjects": 30,
+    "bootstrap_draws": 50000,
+    "bootstrap_type": "percentile",
+    "sign_flip_draws": 200000,
+    "two_sided": true,
+    "p_values": "unadjusted",
+    "rounding": "compute from unrounded subject values first"
+  },
+  "publication_state": "submitted; public reproducibility artifact",
+  "paired_comparisons": [
+    {
+      "comparison": "Full-NoDistill",
+      "difference": [
+        9.08,
+        6.65
+      ],
+      "ci": [
+        [
+          8.18,
+          9.98
+        ],
+        [
+          5.65,
+          7.59
+        ]
+      ],
+      "p": [
+        "<0.001",
+        "<0.001"
+      ],
+      "positive_subjects": [
+        30,
+        30
+      ]
+    },
+    {
+      "comparison": "Unrestricted-NoDistill",
+      "difference": [
+        0.15,
+        -0.08
+      ],
+      "p": [
+        0.491,
+        0.721
+      ]
+    },
+    {
+      "comparison": "Full-WithinClass",
+      "difference": [
+        1.14,
+        0.6
+      ],
+      "ci": [
+        [
+          0.72,
+          1.54
+        ],
+        [
+          0.18,
+          1.06
+        ]
+      ],
+      "p": [
+        "<0.001",
+        0.012
+      ],
+      "positive_subjects": [
+        25,
+        19
+      ]
+    },
+    {
+      "comparison": "Full-InstanceOnly",
+      "difference": [
+        -0.09,
+        -0.11
+      ],
+      "ci": [
+        [
+          -0.55,
+          0.37
+        ],
+        [
+          -0.62,
+          0.39
+        ]
+      ],
+      "p": [
+        0.694,
+        0.672
+      ],
+      "positive_subjects": [
+        14,
+        15
+      ]
+    },
+    {
+      "comparison": "Full-LabelSimplex",
+      "difference": [
+        11.22,
+        8.38
+      ],
+      "ci": [
+        [
+          10.3,
+          12.19
+        ],
+        [
+          7.14,
+          9.59
+        ]
+      ],
+      "p": [
+        "<0.001",
+        "<0.001"
+      ],
+      "positive_subjects": [
+        30,
+        30
+      ]
+    }
+  ],
+  "paradigm_order": [
+    "overt",
+    "silent_1001"
+  ],
+  "within_class_gain_retention_percent": [
+    87.5,
+    90.9
+  ],
+  "dataset": {
+    "name": "T-MSPD",
+    "subjects": 30,
+    "classes": 10,
+    "overt_trials": 14869,
+    "silent_trials": 14851,
+    "eeg_shape": [
+      60,
+      256
+    ],
+    "emg_shape": [
+      6,
+      1000
+    ],
+    "eeg_window_ms": [
+      -100,
+      900
+    ],
+    "silent_definition": "non-phonated articulation, not Imagined"
+  },
+  "task_grids": {
+    "main_core_stage2": 60,
+    "main_core_stage3": 3600,
+    "instance_only_stage2": 15,
+    "instance_only_stage3": 900,
+    "label_simplex_stage2": 15,
+    "label_simplex_stage3": 900,
+    "subject_isolated_stage1": 15,
+    "subject_isolated_stage2": 30,
+    "subject_isolated_adaptation_stage3": 1800,
+    "channel_retraining": 600,
+    "smoothgrad": 600,
+    "eegnet_expected": 900
+  }
+}

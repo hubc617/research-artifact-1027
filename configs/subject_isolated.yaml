@@ -1,0 +1,33 @@
+split_family: outer_seed_20260811
+seeds: [42, 2026, 3407]
+outer_folds: [0, 1, 2, 3, 4]
+inner_folds: [0, 1, 2, 3, 4]
+variants: [full, no_distill]
+target_subjects_per_outer_fold: 6
+stage1:
+  cells: 15
+  epochs: 150
+  batch_size: 64
+  target_subject_overlap: 0
+stage2:
+  cells: 30
+  epochs: 150
+  batch_size: 8
+  warmup_epochs: 30
+  target_subject_overlap: 0
+stage3:
+  cells: 1800
+  epochs: 100
+  batch_size: 8
+  encoder_lr: 1.0e-6
+  classifier_lr: 1.0e-5
+  dropout: 0.5
+  label_smoothing: 0.1
+  weight_decay: 0.05
+  gradient_clip: 1.0
+  scheduler: {name: CosineAnnealingLR, eta_min: 1.0e-6}
+  checkpoint_selection: maximum_target_validation_balanced_accuracy_only
+  final_test_policy: construct_once_after_selected_checkpoint_reload
+notes:
+  - Historical adaptation hyperparameters are preserved for this protocol.
+  - Subject-dependent clean-main checkpoints are not compatible substitutes.

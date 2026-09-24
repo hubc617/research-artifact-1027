@@ -1,0 +1,17 @@
+protocol:
+  architecture: EEGNet-8,2
+  seeds: [42, 2026, 3407]
+  folds: [0, 1, 2, 3, 4]
+  subjects: S01-S30
+  paradigms: [overt, silent_1001]
+  epochs: 100
+  batch_size: 8
+  optimizer: Adam
+  learning_rate: 0.001
+  weight_decay: 0.0
+  label_smoothing: 0.1
+  gradient_clip: 1.0
+  scheduler: cosine
+  eta_min: 0.000001
+  checkpoint_selection: validation_balanced_accuracy
+  final_test_policy: once_after_selected_checkpoint_reload

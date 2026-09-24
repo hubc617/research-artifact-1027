@@ -1,0 +1,24 @@
+paths:
+  data_root: null
+  split_root: null
+protocol:
+  variant: label_simplex
+  split_family: outer_seed_20260811
+  seeds: [42, 2026, 3407]
+  folds: [0, 1, 2, 3, 4]
+  subjects: 30
+  paradigms: [overt, silent_1001]
+  epochs: 100
+  encoder_learning_rate: 0.000003
+  classifier_learning_rate: 0.0001
+  dropout: 0.5
+  label_smoothing: 0.1
+  batch_size: 8
+  optimizer: AdamW
+  weight_decay: 0.05
+  gradient_clip: 1.0
+  scheduler: cosine
+  eta_min: 0.000001
+  checkpoint_selection: validation_balanced_accuracy
+  emg_access: prohibited
+  final_test_policy: once_after_selected_checkpoint_reload

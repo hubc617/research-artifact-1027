@@ -1,0 +1,25 @@
+paths:
+  data_root: null
+  split_root: null
+protocol:
+  seeds: [42, 2026, 3407]
+  folds: [0, 1, 2, 3, 4]
+  epochs: 150
+  variant: label_simplex
+  split_family: outer_seed_20260811
+  prototype: regular_simplex_10x256_first_10_coordinates
+  prototype_sha256: 1f0698d642af6bf2a219a0d704adbce239e9bca5c12e89f37484581ad68bf3c1
+  emg_access: prohibited
+  warmup_epochs: 30
+  label_loss_weight: 1.0
+  auxiliary_classification_weight: 0.1
+  eeg_mask_ratio: 0.75
+  batch_size: 8
+  validation_batch_size: 64
+  learning_rate: 0.0003
+  weight_decay: 0.05
+  gradient_clip: 1.0
+  label_smoothing: 0.1
+  scheduler: cosine
+  eta_min: 0.000001
+  checkpoint_selection: validation_balanced_accuracy

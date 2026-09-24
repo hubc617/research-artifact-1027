@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+title: "Privileged EMG Distillation for EEG-Only Speech Decoding"
+message: "If you use this software, please cite the associated paper and this repository."
+type: software
+version: 0.1.0
+license: MIT
+repository-code: "https://github.com/hubc617/research-artifact-1027"
+authors:
+  - family-names: Hu
+    given-names: Beichen
+    orcid: "https://orcid.org/0009-0008-3364-7499"
+    affiliation: "Nanjing University"
+  - family-names: Zhao
+    given-names: Haonian
+  - family-names: Sun
+    given-names: Jianhao
+  - family-names: Dong
+    given-names: Pengxiang
+  - family-names: Wang
+    given-names: Ran

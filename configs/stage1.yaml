@@ -1,0 +1,17 @@
+paths:
+  data_root: null
+  split_root: null
+protocol:
+  seeds: [42, 2026, 3407]
+  folds: [0, 1, 2, 3, 4]
+  epochs: 150
+  batch_size: 64
+  optimizer: AdamW
+  learning_rate: 0.0005
+  weight_decay: 0.05
+  scheduler: cosine
+  eta_min: 0.000001
+  gradient_clip: 1.0
+  audio_encoder: hubert-base
+  audio_feature_layer: ninth-transformer-block
+  audio_pooling: temporal-mean

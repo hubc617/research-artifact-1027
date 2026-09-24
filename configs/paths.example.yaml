@@ -1,0 +1,3 @@
+paths:
+  data_root: /path/to/legal/T-MSPD/pre_MMSD_for_efm
+  split_root: /path/to/generated/splits

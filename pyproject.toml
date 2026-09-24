@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "privileged-emg-distillation"
+version = "0.1.0"
+description = "EEG-only speech decoding with privileged EMG distillation"
+requires-python = ">=3.10"
+dependencies = ["numpy", "PyYAML", "scikit-learn", "torch"]
+
+[project.optional-dependencies]
+analysis = ["pandas", "scipy"]
+visualization = ["matplotlib", "mne"]
+test = ["pytest"]
+[tool.setuptools.packages.find]
+where = ["src"]

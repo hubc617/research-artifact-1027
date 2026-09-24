@@ -1,0 +1,16 @@
+paths:
+  data_root: null
+  split_root: null
+protocol:
+  seeds: [42, 2026, 3407]
+  folds: [0, 1, 2, 3, 4]
+  epochs: 150
+  variant: instance_only_alpha0
+  alpha: 0.0
+  target: normalized_paired_emg_representation_only
+  warmup_epochs: 30
+  batch_size: 8
+  learning_rate: 0.0003
+  weight_decay: 0.05
+  label_smoothing: 0.1
+  checkpoint_selection: validation_balanced_accuracy

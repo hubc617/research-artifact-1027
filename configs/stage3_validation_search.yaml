@@ -1,0 +1,24 @@
+selection_scope: validation_only
+selection_metric: equal_weight_mean_validation_balanced_accuracy
+development_subjects: [S01, S04, S07, S10, S13, S16, S19, S22, S25, S28]
+variants: [full, no_distill]
+seeds: [42]
+folds: [0, 1, 2, 3, 4]
+paradigms: [overt, silent_1001]
+fixed:
+  epochs: 100
+  batch_size: 8
+  weight_decay: 0.05
+  gradient_clip: 1.0
+  scheduler: {name: CosineAnnealingLR, eta_min: 1.0e-6}
+candidates:
+  A: {encoder_lr: 1.0e-6, classifier_lr: 1.0e-5, dropout: 0.5, label_smoothing: 0.10}
+  B: {encoder_lr: 1.0e-6, classifier_lr: 3.0e-5, dropout: 0.5, label_smoothing: 0.10}
+  C: {encoder_lr: 1.0e-6, classifier_lr: 1.0e-4, dropout: 0.5, label_smoothing: 0.10}
+  D: {encoder_lr: 3.0e-6, classifier_lr: 3.0e-5, dropout: 0.5, label_smoothing: 0.10}
+  E: {encoder_lr: 3.0e-6, classifier_lr: 1.0e-4, dropout: 0.5, label_smoothing: 0.10}
+  F: {encoder_lr: 3.0e-7, classifier_lr: 3.0e-5, dropout: 0.5, label_smoothing: 0.10}
+  G: {encoder_lr: 1.0e-6, classifier_lr: 3.0e-5, dropout: 0.3, label_smoothing: 0.10}
+  H: {encoder_lr: 1.0e-6, classifier_lr: 3.0e-5, dropout: 0.5, label_smoothing: 0.05}
+frozen_winner: E
+final_test_during_selection: prohibited

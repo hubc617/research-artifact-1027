@@ -1,0 +1,18 @@
+channel_removal:
+  seed: 42
+  variants: [full, no_distill]
+  removed_channels: 32
+  retained_channels: 28
+  mask_scope: [train, validation, final_test]
+  stage2_retraining: false
+smoothgrad_abs:
+  seed: 42
+  variants: [full, no_distill]
+  noise_samples: 16
+  noise_sd_ratio: 0.1
+  target: true_class_logit
+  trial_normalization: l1
+statistics:
+  unit: subject
+  bootstrap_draws: 50000
+  sign_flip_draws: 200000
