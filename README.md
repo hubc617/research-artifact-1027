@@ -1,9 +1,9 @@
 # Reproducibility materials — Submission 1027
 
-This private reproducibility repository contains the source-only clean-20260811
-implementation associated with submitted manuscript 1027. It is a submission
-artifact, not an accepted-paper record. EMG is privileged information during
-training; Stage 3 deployment and inference use EEG only. The repository
+This reproducibility artifact contains the source-only clean-20260811
+implementation associated with submitted manuscript 1027. It accompanies a
+submission and is not an accepted-paper record. EMG is privileged information
+during training; Stage 3 deployment and inference use EEG only. The repository
 contains no T-MSPD data, feature arrays, checkpoints, trial predictions, raw
 result files, or audio cache.
 
@@ -225,6 +225,7 @@ artifacts and are deliberately not included in the repository.
 The clean `outer_seed_20260811` primary analysis contains 3 seeds, 5 folds, 30
 subjects, and 2 paradigms. Stage-3 balanced accuracy is averaged over 15
 seed-fold cells within each subject before the 30 subjects are summarized.
+Silent denotes non-phonated articulation, not imagined speech.
 
 | Condition | Overt BA (%) | Silent BA (%) | Stage-2 validation BA (%) |
 |---|---:|---:|---:|
@@ -244,6 +245,8 @@ Full minus NoDistill Stage-3 differences are `+9.08 pp` Overt (95% CI
 two-sided sign-flip p values are below `0.001` and all `30/30` subject
 differences are positive in each paradigm. Within-class shuffling retains
 `87.5%/90.9%` of the unrounded Full benefit.
+This control preserves joint subject, paradigm, and lexical grouping, so it
+does not isolate a class-only causal effect.
 
 Full minus InstanceOnlyAlpha0 is `-0.09 pp` Overt and `-0.11 pp` Silent; both
 paired bootstrap intervals include zero. Under this experiment, the
@@ -285,18 +288,6 @@ positive subjects in each paradigm. These are sensitivity and relative
 attribution results, not localization evidence. EMG-only and EEG+EMG observed
 means are `81.71/73.11%` and `84.84/76.27%`; both require EMG at inference,
 and no unarchived paired significance is claimed.
-
-## Limitations
-
-- Results come from one dataset.
-- Silent denotes non-phonated articulation, not imagined speech.
-- Benefits are sensitive to peripheral-channel removal.
-- SmoothGrad-Abs is not source localization.
-- The prototype term did not show measurable incremental value over paired
-  instance-only distillation; this is not an equivalence conclusion.
-- The within-class shuffle preserves the joint subject, paradigm, and lexical
-  grouping and does not isolate a class-only causal effect.
-- EEGNet is a system-level comparator, not a claim of state of the art.
 
 See [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) and
 [docs/EXPECTED_RESULTS.md](docs/EXPECTED_RESULTS.md) for provenance and result
