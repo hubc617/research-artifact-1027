@@ -1,15 +1,8 @@
 # Reproducibility materials — Submission 1027
 
-This reproducibility artifact contains the source-only clean-20260811
-implementation associated with submitted manuscript 1027. It accompanies a
-submission and is not an accepted-paper record. EMG is privileged information
-during training; Stage 3 deployment and inference use EEG only. The repository
-contains no T-MSPD data, feature arrays, checkpoints, trial predictions, raw
-result files, or audio cache.
+This repository provides code and configurations for Privileged EMG Distillation for EEG-Only Speech Decoding. EMG serves as privileged information during training; Stage 3 fine-tuning and inference use EEG only. The T-MSPD dataset and derived features are not redistributed; see the reproduction instructions below.
 
-The work is a controlled comparison under one prespecified protocol. It does
-not claim state of the art; Full outperforms the included EEGNet-8,2 baseline
-under the reported protocol.
+Under the reported protocol, Full improves balanced accuracy over NoDistill and the included EEGNet-8,2 baseline.
 
 ## Method
 
