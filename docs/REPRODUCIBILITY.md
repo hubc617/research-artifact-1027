@@ -47,6 +47,6 @@ plus-one sign-flip correction.
 
 The repository includes only source and documentation. Generated manifests,
 splits, checkpoints, task results, predictions, curves, caches, PDFs, and raw
-or derived arrays are excluded. Public release checks verify the committed file
-set directly; the detailed internal release audit is retained outside this
-repository.
+or derived arrays are excluded. Repository release checks verify the committed
+file set directly; the detailed internal release audit is retained outside
+this repository.

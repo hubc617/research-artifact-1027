@@ -272,7 +272,7 @@
     "p_values": "unadjusted",
     "rounding": "compute from unrounded subject values first"
   },
-  "publication_state": "submitted; public reproducibility artifact",
+  "publication_state": "submitted; private reproducibility repository",
   "paired_comparisons": [
     {
       "comparison": "Full-NoDistill",
