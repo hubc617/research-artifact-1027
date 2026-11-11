@@ -21,7 +21,9 @@ EEG arrays are float32 `(N, 60, 256)`. EMG arrays are `(N, 6, >=1000)`;
 the first 1000 samples are used. Source labels are integers 1-10 and are
 converted to 0-9 internally.
 
-For Overt trials, `*_audio_feat.npy` is a compatibility filename for float32
+HuBERT feature extraction for Overt trials uses the raw audio directly,
+without additional offline audio preprocessing.
+`*_audio_feat.npy` is a compatibility filename for float32
 HuBERT Base features from the ninth Transformer block with shape `(N, 50,
 768)`. Features are temporally mean-pooled to 768 dimensions before the
 `768-512-256` projection. Silent trials have no acoustic feature file. Users

@@ -67,7 +67,13 @@ def run_train(args):
         chain.stage2(task)
     else:
         if not args.stage2_checkpoint or not args.subject or not args.paradigm: raise SystemExit("Stage 3 requires --stage2-checkpoint, --subject, and --paradigm")
-        task.update({"stage2_ckpt":args.stage2_checkpoint,"subject":args.subject,"paradigm":args.paradigm,"variant":args.variant})
+        task.update({
+            "stage2_ckpt": args.stage2_checkpoint,
+            "subject": args.subject,
+            "paradigm": args.paradigm,
+            "variant": args.variant,
+            "stage3_modality": "EEG_only",
+        })
         chain.stage3(task)
 
 def main(argv=None):

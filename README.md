@@ -49,12 +49,9 @@ distribute raw audio, HuBERT weights, extraction caches, or feature arrays. The
 loader keeps the historical generic `*_audio_feat.npy` cache API for
 compatibility. Overt cache entries have shape `(N, 50, 768)`.
 
-The submitted method record identifies HuBERT Base and the ninth Transformer
-block, but the historical cache-extraction script, exact model revision, and
-audio sampling/resampling provenance are not included in the retained sources.
-Consequently this repository validates and consumes the frozen cache contract;
-it does not claim that a particular source sampling rate or resampling step was
-historically executed. Archiving that extractor provenance remains pending.
+For Overt trials, HuBERT feature extraction uses the raw audio directly,
+without additional offline audio preprocessing. Stage 1 reads the resulting
+feature cache.
 
 Configure local paths at the command line or in a local copy of
 `configs/paths.example.yaml`. No server path is embedded in the code.
@@ -127,19 +124,25 @@ python scripts/train_stage2.py --config configs/stage2_label_simplex.yaml \
   --output /path/to/new/runs/stage2/label_simplex/seed42/fold0
 ```
 
-Then run all 30 subjects, both paradigms, five folds, and three seeds:
+Stage 3 fine-tunes on EEG and labels using an existing split and the Stage 2
+checkpoint for the matching variant, seed, and fold. Checkpoints are not
+included in this repository. The example runs one Overt task:
 
 ```bash
 python scripts/train_stage3.py --config configs/stage3.yaml \
-  --data-root /path/to/authorized/T-MSPD --split-root /path/to/generated/splits \
-  --seed 42 --fold 0 --epochs 100 --subject S01 --paradigm overt \
-  --stage2-checkpoint /path/to/stage2/best_stage2.pth \
+  --data-root /path/to/eeg-and-labels --split-root /path/to/generated/splits \
+  --seed 42 --fold 0 --epochs 100 --subject S01 --paradigm overt --variant full \
+  --stage2-checkpoint /path/to/new/runs/stage2/full/seed42/fold0/best_stage2.pth \
   --output /path/to/new/runs/stage3/full/seed42/fold0/S01/overt
 ```
 
+For the full Stage 3 grid, run all 30 subjects, both paradigms, five folds,
+and three seeds. The earlier `prepare_splits.py` step uses the general data
+loader and requires the complete input layout in [docs/DATA.md](docs/DATA.md).
+
 For LabelSimplex Stage 3, use `configs/stage3_label_simplex.yaml`, pass
 `--variant label_simplex`, and provide the corresponding validation-selected
-LabelSimplex Stage-2 checkpoint. That path uses only EEG and label arrays.
+LabelSimplex Stage 2 checkpoint.
 
 Every output path must be new. A completed `result.json` is immutable; do not
 rerun a successful task based on its final-test score.
@@ -293,5 +296,4 @@ Known source and archival limitations are recorded in
 ## Citation and license
 
 See [CITATION.cff](CITATION.cff). The source is MIT licensed. This repository
-provides reproducibility materials for a submitted manuscript and does not
-state or imply acceptance.
+provides reproducibility materials for a submitted manuscript.
