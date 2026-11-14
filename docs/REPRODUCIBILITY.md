@@ -1,52 +1,69 @@
-# Reproducibility status
+# Reproducibility
 
-The source exposes explicit data, split, checkpoint, and output arguments and
-contains no private server default. The clean split uses seeds 42, 2026, and
-3407 with five folds. Stage 1 and Stage 2 use 150 epochs; Stage 2 starts with a
-30-epoch reconstruction warm-up. Stage 3 uses the frozen Config-E setting:
-encoder LR `3e-6`, classifier LR `1e-4`, dropout `0.5`, label smoothing `0.1`,
-100 epochs, AdamW weight decay `0.05`, gradient clipping `1.0`, and cosine
-annealing to `1e-6`.
+Start with [the README commands](../README.md#reproduction-order) and the
+[prepared data layout](DATA.md), including the
+[Overt feature cache](DATA.md#overt-acoustic-features). The
+[experiment matrix](EXPERIMENT_MATRIX.md) lists task counts and checkpoint
+dependencies. Generate splits, manifests, checkpoints, and task outputs
+locally. The [submitted results record](SUBMITTED_RESULTS_20260919.json)
+lists the manuscript values.
 
-Checkpoint selection is based on validation balanced accuracy. Primary Stage 3
-constructs the final-test partition only after checkpoint selection and strict
-reload, then evaluates it once. Final-test metrics must never drive selection,
-ranking, retry, or stopping.
+## Checkpoint selection
 
-LabelSimplex uses `configs/stage2_label_simplex.yaml` and the same seeded EEG
-student construction as clean Full. Its Stage-2 loader resolves only EEG and
-lexical-label arrays, and a process audit hook rejects EMG trials, Stage-1
-checkpoints, and EMG-encoder artifacts. The fixed target is generated from
-`I_10 - 11^T/10`, row-normalized, embedded in the first 10 coordinates of
-`R^256`, and zero-padded. The authoritative generated `.npy` byte hash is
+Training selects checkpoints by validation balanced accuracy. Stage 3
+reloads the selected checkpoint before constructing the final-test loader
+and evaluates that partition once. See the
+[training outputs](../README.md#training-outputs) for the files to check
+before running a dependent task or aggregating results.
+
+## LabelSimplex
+
+The fixed target comes from `I_10 - 11^T/10`. The rows are L2-normalized and
+placed in the first 10 coordinates of `R^256`, with zeros elsewhere.
+The generated `.npy` has SHA-256
 `1f0698d642af6bf2a219a0d704adbce239e9bca5c12e89f37484581ad68bf3c1`.
-Its compatibility manifests contain 15 Stage-2 and 900 Stage-3 tasks. The
-unified six-condition manifests contain 90 Stage-2 and 5,400 Stage-3 cells;
-the independent clean-main four-condition manifests remain 60 and 3,600.
 
-The acoustic cache contract is HuBERT Base, ninth Transformer block, temporal
-mean pooling, 768-D trial representation, and a `768-512-256` projection MLP.
-The cache API remains `*_audio_feat.npy` for backward compatibility. The source
-does not generate or distribute audio features, and AttentionPooling is not a
-method component. The historical extractor, exact model revision, source audio
-sampling rate, and any resampling operation are not archived here and must not
-be inferred from the 768-D cache shape.
+## EEGNet statistics
 
-The strict subject-isolated generator emits 15/30/1,800 Stage-1/2/3 task grids
-and separate target train/validation/final-test role files. Each outer fold
-excludes all six target subjects from upstream training and validation. This
-pipeline preserves the historical adaptation learning rates `1e-6/1e-5`; it
-must not use subject-dependent clean-main checkpoints.
+The participant-level records behind the reported EEGNet statistics are
+not included in the repository.
 
-`paired_subject_statistics.py` accepts either one subject estimate per cell or
-strict 15-cell seed/fold inputs. For raw inputs it first averages five folds
-within each seed, then averages the three seeds, and finally performs inference
-on 30 subject differences. Outputs record separate bootstrap and sign-flip RNG
-seeds, 50,000/200,000 draws by default, percentage-point units, and the
-plus-one sign-flip correction.
+## Paired participant statistics
 
-The repository includes only source and documentation. Generated manifests,
-splits, checkpoints, task results, predictions, curves, caches, PDFs, and raw
-or derived arrays are excluded. Repository release checks verify the committed
-file set directly; the detailed internal release audit is retained outside
-this repository.
+`scripts/paired_subject_statistics.py` accepts a table of participant
+estimates or a complete grid of five folds and three seeds per participant
+and paradigm. For the grid, it averages folds within seed and then averages
+seeds before forming the 30 paired participant differences. The output
+reports percentage-point differences, separate random seeds for the 50,000
+bootstrap and 200,000 sign-flip draws, and the plus-one correction used for
+the sign-flip test.
+
+## Channel removal, SmoothGrad, and Fig. 2
+
+Use `scripts/generate_secondary_manifests.py` to list the seed-42 tasks.
+For each channel-removal task, `scripts/run_channel_removal.py` accepts
+`--preset 28-channel` and writes metrics to the JSON path given by `--output`.
+The `all` preset runs the matched all-channel condition. See the
+[channel mask](ARCHITECTURE_AND_PROTOCOL.md#channel-mask) for the experiment scope.
+
+`scripts/run_smoothgrad.py` takes matching Stage 2 and Stage 3 checkpoints.
+It writes one CSV per task, with `channel` and `relative_attribution` columns.
+
+For Fig. 2, combine the task outputs to form paired Full − NoDistill
+differences for each participant and channel, averaging the five folds
+within each participant and paradigm. Average the participant differences
+within each paradigm and channel, keeping the attribution values as fractions.
+Prepare the channel summary CSV with columns `paradigm`, `channel`, and
+`full_minus_no_distill`, with one row per channel for each of `overt` and
+`silent_1001` (60 rows each). Write the figure to an existing output directory.
+
+```bash
+python scripts/make_fig2_v7.py \
+  --channel-summary /path/to/summaries/fig2_channel_summary.csv \
+  --output /path/to/summaries/fig2.pdf
+```
+
+To add panel annotations, supply `--annotation-summary` with CSV columns
+`paradigm`, `shift_pp`, `positive_subjects`, and `total_subjects`.
+For a grayscale preview, use a `.png` path for `--output` and supply a
+second PNG path with `--grayscale-output`.
