@@ -48,8 +48,8 @@ def read_channel_vectors(path):
         if not part.index.is_unique or set(part.index) != set(EEG_CHANNELS):
             raise ValueError(f"{path}: {paradigm} needs exactly 60 unique channels")
         values = part.loc[EEG_CHANNELS, "full_minus_no_distill"].to_numpy(dtype=float)
-        if not np.isfinite(values).all() or np.abs(values).max() > COLOR_LIMIT:
-            raise ValueError(f"{path}: {paradigm} differences must be finite and within ±{COLOR_LIMIT}")
+        if not np.isfinite(values).all() or np.abs(values).max() > 1.0:
+            raise ValueError(f"{path}: {paradigm} differences must be finite fractions in [-1, 1]")
         # The v7 renderer received float32 channel differences.
         vectors[paradigm] = values.astype(np.float32).astype(float)
     return vectors

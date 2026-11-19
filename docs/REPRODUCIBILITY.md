@@ -32,13 +32,16 @@ not included in the repository.
 
 `scripts/paired_subject_statistics.py` accepts a table of participant
 estimates or a complete grid of five folds and three seeds per participant
-and paradigm. For the grid, it averages folds within seed and then averages
-seeds before forming the 30 paired participant differences. The output
+and paradigm. The CSV columns are `subject`, `paradigm`, `variant`, and
+`balanced_accuracy` in percent. Task-level inputs add both `seed` and `fold`.
+The `--left` and `--right` conditions must each cover S01–S30 in both
+`overt` and `silent_1001`. The script averages folds within each seed,
+then averages the three seeds before forming the 30 paired participant differences. The output
 reports percentage-point differences, separate random seeds for the 50,000
 bootstrap and 200,000 sign-flip draws, and the plus-one correction used for
 the sign-flip test.
 
-### Standalone target adaptation
+## Standalone target adaptation
 
 `scripts/run_adaptation.py` adapts an existing Stage 2 checkpoint to one
 participant and paradigm. It builds its own five stratified folds within the
@@ -59,8 +62,18 @@ Stage 2 checkpoints trained with the target participants held out.
 Use `scripts/generate_secondary_manifests.py` to list the seed-42 tasks.
 For each channel-removal task, `scripts/run_channel_removal.py` accepts
 `--preset 28-channel` and writes metrics to the JSON path given by `--output`.
-The `all` preset runs the matched all-channel condition. See the
+The `all` preset runs the matched all-channel condition. Both presets use EEG,
+labels, the generated splits, and the matching Stage 2 checkpoint. Keep the
+checkpoint fixed when comparing presets. See the
 [channel mask](ARCHITECTURE_AND_PROTOCOL.md#channel-mask) for the experiment scope.
+
+```bash
+python scripts/run_channel_removal.py \
+  --data-root /path/to/eeg-and-labels --split-root /path/to/generated/splits \
+  --stage2-checkpoint /path/to/runs/stage2/full/seed42/fold0/best_stage2.pth \
+  --subject S01 --paradigm overt --fold 0 --seed 42 --preset 28-channel \
+  --output /path/to/new/28-channel.json
+```
 
 Generate the SmoothGrad manifest with the paths for your task outputs.
 
