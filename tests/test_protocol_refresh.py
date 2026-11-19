@@ -1,9 +1,11 @@
 from pathlib import Path
 import re
 
+import numpy as np
 import yaml
 
 from privileged_emg.cli import LEGACY_VARIANTS, VARIANTS
+from privileged_emg.dataset import load_data_splits
 from privileged_emg.eegnet import EEGNet82, architecture_dict
 from privileged_emg.model_stage2 import HierarchicalDistillLoss
 
@@ -47,14 +49,26 @@ def test_eegnet_82_architecture() -> None:
     assert values["input_shape"] == [60, 256]
 
 
-def test_hubert_documentation_is_consistent() -> None:
+def test_overt_audio_cache_contract_and_temporal_mean(tmp_path) -> None:
     text = "\n".join(
         (ROOT / path).read_text()
         for path in ("README.md", "docs/DATA.md", "docs/REPRODUCIBILITY.md")
     )
     assert "HuBERT Base" in text
     assert "ninth Transformer block" in text
-    assert "AttentionPooling is not" in text
+    subject = tmp_path / "overt" / "S01"
+    subject.mkdir(parents=True)
+    audio = np.arange(2 * 50 * 768, dtype=np.float32).reshape(2, 50, 768)
+    np.save(subject / "S01_audio_feat.npy", audio)
+    np.save(subject / "S01_eeg_feat.npy", np.zeros((2, 60, 256), dtype=np.float32))
+    np.save(subject / "S01_emg.npy", np.zeros((2, 6, 1000), dtype=np.float32))
+    np.save(subject / "S01_labels.npy", np.array([1, 2]))
+    _, _, tests = load_data_splits(
+        tmp_path, paradigms=("overt",), unseen_subjects=("S01",), emg_notch=False,
+    )
+    assert tests["audio"].shape == (2, 768)
+    assert tests["audio"].dtype == np.float32
+    np.testing.assert_array_equal(tests["audio"], audio.mean(axis=1, dtype=np.float32))
 
 
 def test_readme_script_and_config_entries_exist() -> None:

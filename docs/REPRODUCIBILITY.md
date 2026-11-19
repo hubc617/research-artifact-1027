@@ -38,6 +38,22 @@ reports percentage-point differences, separate random seeds for the 50,000
 bootstrap and 200,000 sign-flip draws, and the plus-one correction used for
 the sign-flip test.
 
+### Standalone target adaptation
+
+`scripts/run_adaptation.py` adapts an existing Stage 2 checkpoint to one
+participant and paradigm. It builds its own five stratified folds within the
+target (seed `20260801`) and reserves 15% of the remaining examples for
+validation. It uses the common loader, so prepare the multimodal arrays in the
+[data layout](DATA.md). Its output includes the train, validation, and test
+counts and final-test metrics.
+
+For the paper's subject-isolated adaptation, use
+`scripts/generate_subject_isolated_manifests.py` and run the exported
+`stage3_subject_isolated_1800.jsonl` tasks through
+`scripts/run_manifest_task.py --kind stage3`. These tasks use the exported
+train, validation, and final-test indices from `outer_seed_20260811` and
+Stage 2 checkpoints trained with the target participants held out.
+
 ## Channel removal, SmoothGrad, and Fig. 2
 
 Use `scripts/generate_secondary_manifests.py` to list the seed-42 tasks.

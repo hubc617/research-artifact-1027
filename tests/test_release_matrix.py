@@ -80,8 +80,8 @@ def test_submitted_results_baseline_and_current_readme() -> None:
     for label, value in expected.items():
         assert stage2[label] == value
         assert f"{value:.2f}" in readme
+    assert (submitted["eegnet"]["ba_overt"], submitted["eegnet"]["ba_silent"]) == (53.26, 40.12)
     assert "`53.26%` Overt and `40.12%` Silent" in readme
-    assert "(`54.53/41.17`) is not substituted or relabeled" in readme
 
 
 def test_fig2_v7_source_preserves_release_invariants() -> None:

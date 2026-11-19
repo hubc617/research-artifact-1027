@@ -53,8 +53,8 @@ pip install -e '.[analysis,visualization,test]'
 ## Reproduction order
 
 Prepare the local `.npy` directory tree described in [data preparation](docs/DATA.md)
-before running `prepare_splits.py`. The script reads the prepared EEG, EMG,
-labels, and Overt acoustic features and writes the deterministic splits.
+before running `prepare_splits.py`. This command uses the common multimodal loader
+and needs EEG, EMG, labels, and Overt acoustic features to generate the splits.
 
 ```bash
 python scripts/prepare_splits.py \
@@ -105,8 +105,9 @@ python scripts/train_stage2.py --config configs/stage2_label_simplex.yaml \
 ```
 
 Stage 3 fine-tunes on EEG and labels using an existing split and the Stage 2
-checkpoint for the matching variant, seed, and fold. The example runs one
-Overt task. Its EEG and label files follow the same subject and paradigm
+checkpoint for the matching variant, seed, and fold. Obtain that checkpoint
+by running Stage 2. The example runs one Overt task. Its EEG and label
+files follow the same subject and paradigm
 layout described in [data preparation](docs/DATA.md).
 
 ```bash
@@ -187,6 +188,28 @@ their result and checkpoint files. For a full-grid summary, check every row
 in the selected manifest. EEGNet aggregation requires `result.json` with
 `"status": "complete"`, `best_eegnet.pth`, and `predictions.npz` for every task.
 The aggregator checks that the predictions match the test splits.
+
+Summarize completed main-grid tasks from their manifests.
+
+```bash
+python scripts/aggregate_paper_results.py --grid four \
+  --stage2-manifest /path/to/manifests/stage2_clean_main_four_variant_60.jsonl \
+  --stage3-manifest /path/to/manifests/stage3_clean_main_four_variant_3600.jsonl \
+  --output /path/to/new/main-grid-summary
+```
+
+Use `--grid six` with `stage2_six_variant_90.jsonl` and
+`stage3_six_variant_5400.jsonl` to include InstanceOnly and LabelSimplex.
+For separate batches, pass each manifest of a stage with another
+`--stage2-manifest` or `--stage3-manifest` flag. Use absolute paths in the
+manifests, or run the aggregator from the working directory used for the tasks.
+Every selected task must have an identity-matched `out_dir/result.json`.
+
+The summary uses balanced accuracy in percent. Stage 3 first averages each
+participant's five folds and three seeds, then averages across participants
+within each condition and paradigm. Paired differences for the five core
+contrasts are in percentage points. The optional Stage 2 table averages
+validation balanced accuracy over the 15 seed/fold cells for each condition.
 
 ## Reported results
 

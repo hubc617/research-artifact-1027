@@ -9,6 +9,67 @@ import numpy as np
 import pandas as pd
 
 
+PARADIGMS = ("overt", "silent_1001")
+SUBJECTS = {f"S{i:02d}" for i in range(1, 31)}
+CELLS = {(seed, fold) for seed in (42, 2026, 3407) for fold in range(5)}
+GROUP_KEYS = ["subject", "paradigm", "variant"]
+
+
+def validate_pairs(frame: pd.DataFrame, left: str, right: str) -> tuple[pd.DataFrame, bool]:
+    required = {*GROUP_KEYS, "balanced_accuracy"}
+    if missing := required - set(frame):
+        raise ValueError(f"missing columns: {sorted(missing)}")
+    if left == right:
+        raise ValueError("--left and --right must select distinct conditions")
+
+    task_columns = {"seed", "fold"} & set(frame)
+    if task_columns and len(task_columns) != 2:
+        raise ValueError("task-level inputs must supply both seed and fold")
+
+    selected = frame.loc[frame.variant.isin((left, right))].copy()
+    if not selected.paradigm.isin(PARADIGMS).all():
+        values = selected.loc[~selected.paradigm.isin(PARADIGMS), "paradigm"].unique()
+        raise ValueError(f"unexpected paradigm for selected conditions: {values.tolist()}")
+
+    for paradigm in PARADIGMS:
+        for variant in (left, right):
+            subjects = set(selected.loc[
+                (selected.paradigm == paradigm) & (selected.variant == variant), "subject"
+            ])
+            if subjects != SUBJECTS:
+                raise ValueError(
+                    f"{paradigm}/{variant}: expected S01-S30, "
+                    f"missing={sorted(SUBJECTS - subjects)}, "
+                    f"unexpected={sorted(map(str, subjects - SUBJECTS))}"
+                )
+
+    for (subject, paradigm, variant), group in selected.groupby(GROUP_KEYS):
+        identity = f"{subject}/{paradigm}/{variant}"
+        accuracy = pd.to_numeric(group.balanced_accuracy, errors="coerce")
+        if not np.isfinite(accuracy).all() or not accuracy.between(0, 100).all():
+            raise ValueError(f"{identity}: balanced_accuracy must be finite and in 0–100 percent")
+        if not task_columns:
+            if len(group) != 1:
+                raise ValueError(f"{identity}: subject-level input must contain exactly one row")
+            continue
+
+        seed = pd.to_numeric(group.seed, errors="coerce")
+        fold = pd.to_numeric(group.fold, errors="coerce")
+        if not (seed.isin([42, 2026, 3407]).all() and fold.isin(range(5)).all()):
+            raise ValueError(f"{identity}: expected integer seed in (42, 2026, 3407) and fold in 0–4")
+        cells = list(zip(seed, fold))
+        if len(cells) != len(set(cells)) or set(cells) != CELLS:
+            raise ValueError(
+                f"{identity}: expected each seed/fold once, "
+                f"duplicates={len(cells) - len(set(cells))}, missing={sorted(CELLS - set(cells))}"
+            )
+
+    selected["balanced_accuracy"] = pd.to_numeric(selected.balanced_accuracy)
+    if task_columns:
+        selected = selected.astype({"seed": int, "fold": int})
+    return selected, bool(task_columns)
+
+
 def sign_flip(values: np.ndarray, draws: int, rng: np.random.Generator) -> float:
     observed = abs(float(values.mean()))
     exceed = 0
@@ -30,39 +91,20 @@ def main() -> None:
     parser.add_argument("--bootstrap-seed", type=int, default=20260917)
     parser.add_argument("--sign-flip-seed", type=int, default=20260918)
     args = parser.parse_args()
-    frame = pd.read_csv(args.input)
-    required = {"subject", "paradigm", "variant", "balanced_accuracy"}
-    if missing := required - set(frame):
-        raise ValueError(f"missing columns: {sorted(missing)}")
-    cell_columns = {"seed", "fold"}
-    if cell_columns.issubset(frame.columns):
-        keys = ["subject", "paradigm", "variant"]
-        counts = frame.groupby(keys).size()
-        if not (counts == 15).all():
-            raise ValueError(
-                "raw three-seed/five-fold input must contain exactly 15 cells "
-                "per subject, paradigm, and variant"
-            )
-        if set(frame["seed"].astype(int)) != {42, 2026, 3407}:
-            raise ValueError("expected seeds 42, 2026, and 3407")
-        if set(frame["fold"].astype(int)) != set(range(5)):
-            raise ValueError("expected folds 0-4")
-        seed_level = frame.groupby([*keys, "seed"], as_index=False)["balanced_accuracy"].mean()
-        frame = seed_level.groupby(keys, as_index=False)["balanced_accuracy"].mean()
+    frame, task_level = validate_pairs(pd.read_csv(args.input), args.left, args.right)
+    if task_level:
+        seed_level = frame.groupby([*GROUP_KEYS, "seed"], as_index=False)["balanced_accuracy"].mean()
+        frame = seed_level.groupby(GROUP_KEYS, as_index=False)["balanced_accuracy"].mean()
         aggregation = "mean five folds within each seed, then mean three seeds"
         n_source_cells_per_subject = 15
     else:
-        if frame.duplicated(["subject", "paradigm", "variant"]).any():
-            raise ValueError("subject-level input contains duplicate cells")
         aggregation = "input already contains one estimate per subject/paradigm/variant"
         n_source_cells_per_subject = 1
     rows = []
-    for offset, paradigm in enumerate(("overt", "silent_1001")):
+    for offset, paradigm in enumerate(PARADIGMS):
         part = frame[frame.paradigm == paradigm].pivot(
             index="subject", columns="variant", values="balanced_accuracy"
         )
-        if set(part.index) != {f"S{i:02d}" for i in range(1, 31)}:
-            raise ValueError(f"{paradigm}: expected exactly S01-S30")
         values = (part[args.left] - part[args.right]).to_numpy(float)
         bootstrap_seed = args.bootstrap_seed + offset
         sign_flip_seed = args.sign_flip_seed + offset
