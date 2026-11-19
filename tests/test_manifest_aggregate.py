@@ -50,10 +50,17 @@ def test_aggregate_formal_manifests(manifests, tmp_path, grid):
     save_fixture_results(stage2, "best_val_balanced_accuracy")
     save_fixture_results(stage3, "test_balanced_accuracy")
     output = tmp_path / "summary"
-    process = run_cli(
-        "aggregate_paper_results.py", "--grid", grid, "--stage2-manifest", stage2,
-        "--stage3-manifest", stage3, "--output", output,
-    )
+    args = ["--stage2-manifest", stage2, "--stage3-manifest", stage3]
+    if grid == "six":
+        args = []
+        for stage, complete, core in zip((2, 3), (stage2, stage3), manifest_paths(manifests, "four")):
+            standalone = manifests / f"stage{stage}_additional.jsonl"
+            core_lines = set(core.read_text().splitlines())
+            standalone.write_text("".join(
+                line + "\n" for line in complete.read_text().splitlines() if line not in core_lines
+            ))
+            args.extend((f"--stage{stage}-manifest", core, f"--stage{stage}-manifest", standalone))
+    process = run_cli("aggregate_paper_results.py", "--grid", grid, *args, "--output", output)
     assert process.returncode == 0, process.stderr
     means = pd.read_csv(output / "table1_reconstructed.csv")
     stage2_means = pd.read_csv(output / "stage2_validation_summary.csv")
