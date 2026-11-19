@@ -84,15 +84,15 @@ def train_downstream(train,val,final_test_factory,stage1,stage2,modality,epochs,
  test=final_test_factory()
  return best,evaluate(model,test,modality,dev,scale),model
 
-def eeg_train_validation_and_test_factory(subject,paradigm,fold):
+def eeg_train_validation_and_test_factory(split_root, subject, paradigm, fold):
  eeg_path,label_path=stage3_data_paths(common.require_data_root(),subject,paradigm)
- train_idx=load_partition_indices(SPLIT_ROOT,subject,paradigm,fold,'train')
- validation_idx=load_partition_indices(SPLIT_ROOT,subject,paradigm,fold,'validation')
+ train_idx=load_partition_indices(split_root, subject, paradigm, fold, 'train')
+ validation_idx=load_partition_indices(split_root, subject, paradigm, fold, 'validation')
  if np.intersect1d(train_idx,validation_idx).size: raise AssertionError('train/validation overlap')
  train=EEGIndexedDataset(eeg_path,label_path,train_idx,'train')
  validation=EEGIndexedDataset(eeg_path,label_path,validation_idx,'validation')
  def final_test_factory():
-  test_idx=load_partition_indices(SPLIT_ROOT,subject,paradigm,fold,'final_test')
+  test_idx=load_partition_indices(split_root, subject, paradigm, fold, 'final_test')
   if np.intersect1d(train_idx,test_idx).size or np.intersect1d(validation_idx,test_idx).size: raise AssertionError('final-test overlap')
   return EEGIndexedDataset(eeg_path,label_path,test_idx,'final_test')
  return train,validation,final_test_factory
@@ -109,10 +109,13 @@ def adaptation(args):
  pool,test_idx=list(StratifiedKFold(5,shuffle=True,random_state=20260801).split(np.zeros(len(labels)),labels))[args.inner_fold]
  train_local,val_local=next(StratifiedShuffleSplit(1,test_size=.15,random_state=seed).split(np.zeros(len(pool)),labels[pool])); train,val=(common.subset_dict(data,x) for x in (pool[train_local],pool[val_local]))
  best,metrics,_=train_downstream(train,val,lambda:common.subset_dict(data,test_idx),args.stage1_checkpoint,args.stage2_checkpoint,'eeg',args.epochs,seed,encoder_lr=1e-6,classifier_lr=1e-5)
- common.save_json(args.output,{'subject':args.subject,'paradigm':args.paradigm,'inner_fold':args.inner_fold,'seed':args.seed,'n_train':len(train['labels']),'n_val':len(val['labels']),'n_test':len(test['labels']),'best_val_balanced_accuracy':best,**{f'test_{k}':v for k,v in metrics.items()}})
+ common.save_json(args.output,{'subject':args.subject,'paradigm':args.paradigm,'inner_fold':args.inner_fold,'seed':args.seed,'n_train':len(train['labels']),'n_val':len(val['labels']),'n_test':len(test_idx),'best_val_balanced_accuracy':best,**{f'test_{k}':v for k,v in metrics.items()}})
 def channel(args):
  new_output(args.output)
- train,val,final_test_factory=eeg_train_validation_and_test_factory(args.subject,args.paradigm,args.fold);drop=OUTER_RING_WIDE if args.preset=='28-channel' else ()
+ train, val, final_test_factory = eeg_train_validation_and_test_factory(
+     chain.SPLIT_ROOT, args.subject, args.paradigm, args.fold
+ )
+ drop = OUTER_RING_WIDE if args.preset == '28-channel' else ()
  best,metrics,_=train_downstream(train,val,final_test_factory,None,args.stage2_checkpoint,'eeg',args.epochs,args.seed,drop)
  common.save_json(args.output,{'subject':args.subject,'paradigm':args.paradigm,'fold':args.fold,'preset':args.preset,'n_channels':60-len(drop),'dropped_channels':drop,'mask_applied_roles':['train','validation','final_test'],'stage2_unchanged':True,'stage3_modality':'EEG_only','final_test_loader_constructions':1,'final_test_loader_traversals':1,'test_used_for_selection':False,'best_val_balanced_accuracy':best,**{f'test_{k}':v for k,v in metrics.items()}})
 def modality(args):

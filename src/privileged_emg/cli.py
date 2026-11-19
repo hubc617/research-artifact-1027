@@ -54,15 +54,11 @@ def run_train(args):
             "variant": LEGACY_VARIANTS[args.variant],
             "weak_weight": None if args.variant == "label_simplex" else alpha,
             "alpha": None if args.variant == "label_simplex" else alpha,
-            "target": (
-                "fixed_regular_simplex_by_lexical_label"
-                if args.variant == "label_simplex"
-                else (
-                    "normalized_paired_emg_representation_only"
-                    if args.variant == "instance_only_alpha0"
-                    else "normalized_paired_emg_plus_class_prototype"
-                )
-            ),
+            "target": {
+                "label_simplex": "fixed_regular_simplex_by_lexical_label",
+                "instance_only_alpha0": "normalized_paired_emg_representation_only",
+                "no_distill": None,
+            }.get(args.variant, "normalized_paired_emg_plus_class_prototype"),
         })
         chain.stage2(task)
     else:
