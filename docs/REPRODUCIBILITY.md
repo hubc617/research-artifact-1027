@@ -62,24 +62,54 @@ For each channel-removal task, `scripts/run_channel_removal.py` accepts
 The `all` preset runs the matched all-channel condition. See the
 [channel mask](ARCHITECTURE_AND_PROTOCOL.md#channel-mask) for the experiment scope.
 
-`scripts/run_smoothgrad.py` takes matching Stage 2 and Stage 3 checkpoints.
-It writes one CSV per task, with `channel` and `relative_attribution` columns.
-
-For Fig. 2, combine the task outputs to form paired Full − NoDistill
-differences for each participant and channel, averaging the five folds
-within each participant and paradigm. Average the participant differences
-within each paradigm and channel, keeping the attribution values as fractions.
-Prepare the channel summary CSV with columns `paradigm`, `channel`, and
-`full_minus_no_distill`, with one row per channel for each of `overt` and
-`silent_1001` (60 rows each). Write the figure to an existing output directory.
+Generate the SmoothGrad manifest with the paths for your task outputs.
 
 ```bash
-python scripts/make_fig2_v7.py \
-  --channel-summary /path/to/summaries/fig2_channel_summary.csv \
-  --output /path/to/summaries/fig2.pdf
+python scripts/generate_secondary_manifests.py \
+  --checkpoint-root /path/to/checkpoints \
+  --run-root /path/to/runs \
+  --output-dir /path/to/secondary-manifests
 ```
 
-To add panel annotations, supply `--annotation-summary` with CSV columns
-`paradigm`, `shift_pp`, `positive_subjects`, and `total_subjects`.
-For a grayscale preview, use a `.png` path for `--output` and supply a
-second PNG path with `--grayscale-output`.
+For each of the 600 tasks in `smoothgrad_seed42_600.jsonl`, supply
+`channel_attribution.csv` in the directory specified by that row's `output`.
+The CSV columns are `paradigm`, `variant`, `subject`, `fold`, `seed`, `channel`,
+and `relative_attribution`. Repeat the task identity on every row. Include all
+60 channel names. The aggregator matches channels by name in any row order.
+`relative_attribution` is the channel's share of the task's mean
+attribution as a fraction. For a fold-task mean attribution map, sum over the
+time axis to get channel shares. The sum of the 60 shares must be within
+`2e-5` of one.
+
+The Fig. 2 computation uses 16 Gaussian draws per trial with a noise standard
+deviation of 0.1 times the population standard deviation across all 60×256
+trial values. Each task uses its own RNG seed (`100042` plus its zero-based
+index in the final task manifest). It averages the absolute true-class logit
+gradients across noise draws, L1-normalizes the trial's channel-time map,
+then averages trial maps within the test fold.
+`scripts/run_smoothgrad.py` is a separate analysis command. It scales noise
+by each channel's sample standard deviation over time and uses the process's
+RNG state. Use task CSVs produced with the Fig. 2 computation for reproduction.
+
+Aggregate the task CSVs into 120 channel differences in fraction units and two
+panel annotations. The aggregator matches Full and NoDistill tasks by
+participant, paradigm, and fold. It averages the five folds within each
+participant and gives each participant equal weight. The panel shift is the
+mean difference in the sum of the 32 peripheral channels in percentage
+points. The count uses participants with positive differences.
+
+```bash
+python scripts/aggregate_smoothgrad.py \
+  --manifest /path/to/secondary-manifests/smoothgrad_seed42_600.jsonl \
+  --output-dir /path/to/fig2-summaries
+
+python scripts/make_fig2_v7.py \
+  --channel-summary /path/to/fig2-summaries/fig2_channel_summary.csv \
+  --annotation-summary /path/to/fig2-summaries/fig2_annotation_summary.csv \
+  --output /path/to/fig2-summaries/fig2.pdf
+```
+
+Install visualization and analysis packages with
+`python -m pip install -e '.[visualization,analysis]'`. For a grayscale
+preview, use a `.png` path for `--output` and supply a second PNG path with
+`--grayscale-output`.

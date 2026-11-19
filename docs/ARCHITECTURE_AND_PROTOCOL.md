@@ -61,9 +61,11 @@ final testing.
 SmoothGrad-Abs summarizes relative model attribution to each channel.
 The seed-42 analysis uses Full and NoDistill Stage 3 models for all 30
 participants and both paradigms. For each trial, the script takes absolute
-gradients of the true-class logit for 16 noisy inputs, with noise SD equal
-to 0.1 times the trial EEG SD. It averages across noise draws and time,
-then L1-normalizes the channel values before aggregation.
+gradients of the true-class logit for 16 noisy inputs. The Gaussian noise
+SD is 0.1 times the population SD of the entire 60×256 trial. The computation
+averages across noise draws and L1-normalizes the resulting channel-time map.
+It averages the trial maps within a fold, the five folds within a participant,
+and the 30 participants within a paradigm. Channel shares sum over time.
 
 See [secondary analysis instructions](REPRODUCIBILITY.md#channel-removal-smoothgrad-and-fig-2)
 for the plotting input format.
