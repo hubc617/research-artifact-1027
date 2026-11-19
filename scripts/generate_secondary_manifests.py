@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+from itertools import product
 import json
 from pathlib import Path
 
@@ -11,6 +12,18 @@ SUBJECTS = tuple(f"S{i:02d}" for i in range(1, 31))
 PARADIGMS = ("overt", "silent_1001")
 FOLDS = tuple(range(5))
 VARIANTS = ("full", "no_distill")
+FIG2_TASKS = tuple(product(VARIANTS, FOLDS, SUBJECTS, PARADIGMS))
+FIG2_FIRST_NOISE_SEED = 100042
+FIG2_NOISE_FRACTION = 0.1
+FIG2_PROTOCOL = {
+    "analysis": "smoothgrad_abs",
+    "target": "true_class_logit",
+    "noise_samples": 16,
+    "noise_sd": "0.1_times_population_sd_over_trial_channels_and_time",
+    "operation_order": (
+        "abs_gradient_then_noise_mean_then_trial_L1_then_fold_mean_then_time_sum"
+    ),
+}
 CHANNELS = (
     "FP1", "FPZ", "FP2", "AF3", "AF4", "F7", "F5", "F3", "F1", "FZ",
     "F2", "F4", "F6", "F8", "FT7", "FC5", "FC3", "FC1", "FCZ", "FC2",
@@ -64,14 +77,13 @@ def main() -> None:
                         "output": str(args.run_root / "channel_removal" / variant / f"fold{fold}" / subject / paradigm),
                     })
                     smoothgrad.append({
-                        **identity, "analysis": "smoothgrad_abs",
+                        **identity, **FIG2_PROTOCOL,
+                        "noise_seed": FIG2_FIRST_NOISE_SEED + len(smoothgrad),
+                        "stage2_checkpoint": str(stage2),
                         "stage3_checkpoint": str(
                             args.run_root / "stage3" / variant / "seed42" / f"fold{fold}" /
                             subject / paradigm / "best_stage3.pth"
                         ),
-                        "target": "true_class_logit", "noise_samples": 16,
-                        "noise_sd": "0.1_times_within_trial_eeg_sd",
-                        "operation_order": "abs_gradient_then_noise_mean_then_time_mean_then_trial_L1",
                         "output": str(args.run_root / "smoothgrad" / variant / f"fold{fold}" / subject / paradigm),
                     })
     if len(channel) != 600 or len(smoothgrad) != 600:

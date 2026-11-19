@@ -167,8 +167,10 @@ python scripts/run_manifest_task.py --kind stage1 \
 The [experiment matrix](docs/EXPERIMENT_MATRIX.md#subject-isolated-transfer-and-adaptation)
 describes the target exclusions, task counts, and checkpoint lineage.
 
-See the [secondary analysis instructions](docs/REPRODUCIBILITY.md#channel-removal-smoothgrad-and-fig-2)
-for channel removal, SmoothGrad-Abs, and Fig. 2.
+Use `scripts/run_fig2_smoothgrad_task.py` for the seed-42 Fig. 2 tasks.
+The [Fig. 2 instructions](docs/REPRODUCIBILITY.md#channel-removal-smoothgrad-and-fig-2)
+cover the manifests, matching checkpoints, channel removal, and rendering.
+Post reproduction questions in [GitHub Discussions](https://github.com/hubc617/research-artifact-1027/discussions).
 
 ## Training outputs
 

@@ -75,34 +75,52 @@ python scripts/run_channel_removal.py \
   --output /path/to/new/28-channel.json
 ```
 
-Generate the SmoothGrad manifest with the paths for your task outputs.
+Use the seed-42 Stage 2 checkpoints for each variant and fold. Use the
+validation-selected all-channel Stage 3 checkpoint with the same variant,
+seed, fold, participant, and paradigm. The default Stage 3 paths follow the
+`stage3/` layout under `--run-root`. The EEG and labels must follow the
+[data layout](DATA.md). Point `--split-root` at the matching
+`outer_seed_20260811` split files. Each task reads only its `test_idx` from
+the split and uses that order.
 
 ```bash
 python scripts/generate_secondary_manifests.py \
-  --checkpoint-root /path/to/checkpoints \
+  --checkpoint-root /path/to/runs \
   --run-root /path/to/runs \
   --output-dir /path/to/secondary-manifests
+
+python scripts/run_fig2_smoothgrad_task.py \
+  --manifest /path/to/secondary-manifests/smoothgrad_seed42_600.jsonl \
+  --index 0 --data-root /path/to/eeg-and-labels \
+  --split-root /path/to/generated/splits
 ```
 
-For each of the 600 tasks in `smoothgrad_seed42_600.jsonl`, supply
-`channel_attribution.csv` in the directory specified by that row's `output`.
-The CSV columns are `paradigm`, `variant`, `subject`, `fold`, `seed`, `channel`,
-and `relative_attribution`. Repeat the task identity on every row. Include all
-60 channel names. The aggregator matches channels by name in any row order.
-`relative_attribution` is the channel's share of the task's mean
-attribution as a fraction. For a fold-task mean attribution map, sum over the
-time axis to get channel shares. The sum of the 60 shares must be within
-`2e-5` of one.
+Run zero-based indices 0 through 599 once each before aggregating. Index 0
+selects Full, fold 0, S01, Overt. Each task writes `channel_attribution.csv` to
+a new directory at its manifest `output` path. To use another layout, supply
+`--stage2-checkpoint` and `--stage3-checkpoint` explicitly or edit the path
+fields. `--output-dir` overrides the task destination. When aggregating,
+use a manifest whose `output` fields match the CSV locations.
 
-The Fig. 2 computation uses 16 Gaussian draws per trial with a noise standard
+The CSV contains `paradigm`, `variant`, `subject`, `fold`, `seed`,
+`channel`, and `relative_attribution`. The 60 nonnegative channel shares are
+fractions that sum to one within `2e-5`.
+
+The Fig. 2 command uses 16 Gaussian draws per trial with a noise standard
 deviation of 0.1 times the population standard deviation across all 60×256
-trial values. Each task uses its own RNG seed (`100042` plus its zero-based
-index in the final task manifest). It averages the absolute true-class logit
-gradients across noise draws, L1-normalizes the trial's channel-time map,
-then averages trial maps within the test fold.
-`scripts/run_smoothgrad.py` is a separate analysis command. It scales noise
-by each channel's sample standard deviation over time and uses the process's
-RNG state. Use task CSVs produced with the Fig. 2 computation for reproduction.
+input values. It adds noise before the EEG classifier's internal per-channel
+standardization. It preserves the archived RNG consumption by first replaying
+evaluation in batches of 64 with gradients disabled, then differentiating
+the true-class logit for one trial's perturbations at a time. It averages
+absolute gradients across noise draws, L1-normalizes the full trial map,
+averages trial maps within the fold, and sums each channel over time.
+
+The generator records the explicit `noise_seed` for each task identity
+(100042 plus the zero-based index in the historical task order). Regenerate
+older manifests for the new runner. Existing task CSVs can still be aggregated
+using old manifests. CUDA is the default and matches the historical RNG
+backend. `--device cpu` is available for smoke testing and uses the CPU RNG.
+`scripts/run_smoothgrad.py` remains the general analysis command.
 
 Aggregate the task CSVs into 120 channel differences in fraction units and two
 panel annotations. The aggregator matches Full and NoDistill tasks by
